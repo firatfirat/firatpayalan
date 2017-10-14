@@ -9,7 +9,7 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 var hike = require('./routes/hike')
 var app = express();
-app.get('/hikes',function(req,res){
+app.get('/',function(req,res){
   res.sendFile(path.join(__dirname+'/public/html/index.html'))
 });
 app.post('/add_hike',hike.add_hike);
