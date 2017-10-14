@@ -1,0 +1,188 @@
+<html>
+  <head>
+    <title>Yasin Fırat Payalan</title>
+    <style>
+      body {
+        color: white;
+      }
+
+      body, #input {
+        background: black;
+        font-size: 150%;
+        font-family: monospace;
+        line-height: 120%;
+      }
+
+      #output {
+        min-height: 85%;
+        white-space: pre;
+      }
+
+      #input {
+        width: 100%;
+        height: 8%;
+        border: none;
+        color: lime;
+      }
+
+      #input:focus {
+        outline: none;
+      }
+
+      .error {
+        color: red;
+      }
+      /* The navigation bar */
+      .navbar {
+          overflow: hidden;
+          background-color: #333;
+          position: fixed; /* Set the navbar to fixed position */
+          top: 0; /* Position the navbar at the top of the page */
+          width: 100%; /* Full width */
+      }
+
+      /* Links inside the navbar */
+      .navbar a {
+          float: left;
+          display: block;
+          color: #ffffff;
+          text-align: center;
+          padding: 14px 16px;
+          text-decoration: none;
+      }
+
+      /* Main content */
+      .main {
+          /*margin-top: 30px; /* Add a top margin to avoid content overlay */*/
+          /*background-color: purple;*/
+      }
+      .main a{
+        text-decoration: none;
+        color: white;
+      }
+
+    </style>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-108114028-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-108114028-1');
+    </script>
+
+  </head>
+  <body>
+    <div class="main">
+      <p><a target="_blank" href="https://www.linkedin.com/in/yasin-fırat-payalan-46aa766a/">linkedin</a> | <a target="_blank" href="https://github.com/yasinfp">github</a></p>
+    </div>
+    <div id="output"></div>
+
+    <div>
+      <input id="input" type="text" autofocus />
+    </div>
+
+    <!-- thanks to https://github.com/trybash/bash-emulator -->
+    <script src="../javascripts/bash-emulator.min.js"></script>
+    <script>
+      var input = document.getElementById('input')
+      var output = document.getElementById('output')
+
+      var emulator = bashEmulator({
+        workingDirectory: '/',
+        fileSystem: {
+          '/': {
+            type: 'dir',
+            modified: Date.now()
+          },
+          '/README.txt': {
+            type: 'file',
+            modified: Date.now(),
+            content: 'empty'
+          },
+          '/home': {
+            type: 'dir',
+            modified: Date.now()
+          },
+          '/home/user/journal.txt': {
+            type: 'file',
+            modified: Date.now(),
+            content: 'this is private!'
+          },
+          '/home/user': {
+            type: 'dir',
+            modified: Date.now()
+          }
+        }
+      })
+
+      var ENTER = 13
+      var UP = 38
+      var DOWN = 40
+
+      function log (result) {
+        output.innerHTML += (result || '') + '\n'
+      }
+
+      function error (result) {
+        log('<div class="error">' + result + '</div>')
+      }
+
+      function run (cmd) {
+        log('$ ' + cmd)
+        return emulator.run(cmd).then(log, error)
+      }
+
+      var completeFunctions = {}
+      completeFunctions[UP] = emulator.completeUp
+      completeFunctions[DOWN] = emulator.completeDown
+
+      function complete (direction) {
+        var completeFunction = completeFunctions[direction]
+        if (!completeFunction) {
+          return
+        }
+        var cursorPosition = input.selectionStart
+        var beforeCursor = input.value.slice(0, cursorPosition)
+        completeFunction(beforeCursor).then(function (completion) {
+          if (completion) {
+            input.value = completion
+            input.setSelectionRange(cursorPosition, cursorPosition)
+          }
+        })
+      }
+
+      input.addEventListener('keydown', function (e) {
+        if (e.altKey || e.metaKey || e.shiftKey || e.ctrlKey) {
+          return
+        }
+        if (e.which === UP || e.which === DOWN) {
+          e.preventDefault()
+          complete(e.which)
+        }
+      })
+
+      input.addEventListener('keyup', function (e) {
+        if (e.which !== ENTER) {
+          return
+        }
+        if (!input.value.length) {
+          return
+        }
+        run(input.value).then(function () {
+          input.value = ''
+          document.body.scrollTop = 10e6
+        })
+      })
+
+      document.body.addEventListener('click', function () {
+        input.focus()
+      })
+
+      run('pwd').then(function () {
+        run('ls')
+      })
+    </script>
+  <body>
+<html>
